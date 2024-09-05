@@ -10,7 +10,7 @@ This package implements all the features of [KLCPopup](https://github.com/jmasci
 
 ### case 1
 
-![示例动画](https://raw.githubusercontent.com/yiiim/klcpopup/master/preview1.gif)
+<img src="https://raw.githubusercontent.com/yiiim/klcpopup/master/preview1.gif" alt="示例动画" height="500">
 
 ```dart
 final popupController = KLCPopupController();
@@ -51,7 +51,7 @@ showKLCPopup(
 
 ### case 2
 
-![示例动画](https://raw.githubusercontent.com/yiiim/klcpopup/master/preview2.gif)
+<img src="https://raw.githubusercontent.com/yiiim/klcpopup/master/preview2.gif" alt="示例动画" height="500">
 
 ```dart
 final popupController = KLCPopupController();
@@ -98,7 +98,7 @@ showKLCPopup(
 
 ### case 3
 
-![示例动画](https://raw.githubusercontent.com/yiiim/klcpopup/master/preview3.gif)
+<img src="https://raw.githubusercontent.com/yiiim/klcpopup/master/preview2.gif" alt="示例动画" height="500">
 
 ```dart
 final popupController = KLCPopupController();
