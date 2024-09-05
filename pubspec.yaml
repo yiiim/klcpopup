@@ -1,7 +1,7 @@
 name: klcpopup
-description: "A new Flutter package project."
-version: 0.0.1
-homepage:
+description: "KLCPopup is a flexible and easy-to-use popup window."
+version: 1.0.0+1
+homepage: https://github.com/yiiim/klcpopup
 
 environment:
   sdk: '>=3.3.1 <4.0.0'
