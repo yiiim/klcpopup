@@ -98,7 +98,7 @@ showKLCPopup(
 
 ### case 3
 
-<img src="https://raw.githubusercontent.com/yiiim/klcpopup/master/preview2.gif" alt="示例动画" height="500">
+<img src="https://raw.githubusercontent.com/yiiim/klcpopup/master/preview3.gif" alt="示例动画" height="500">
 
 ```dart
 final popupController = KLCPopupController();
