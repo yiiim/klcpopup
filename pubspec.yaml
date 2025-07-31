@@ -1,6 +1,6 @@
 name: klcpopup
 description: "KLCPopup is a flexible and easy-to-use popup window."
-version: 1.0.0+1
+version: 1.0.0+3
 homepage: https://github.com/yiiim/klcpopup
 
 environment:

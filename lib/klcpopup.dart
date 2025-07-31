@@ -119,6 +119,9 @@ enum _KLCPopupViewState {
 ///
 /// [dimmedMaskAlpha] overrides alpha value for dimmed background mask. default = 0.5.
 ///
+/// [backgroundColor] is the background color of the popup. If this value is set, [dimmedMaskAlpha] will be ignored and
+/// the background will be painted with this color.
+///
 /// [shouldDismissOnBackgroundTouch] if YES, then popup will get dismissed when background is touched. default = YES.
 ///
 /// [shouldDismissOnContentTouch] if YES, then popup will get dismissed when content view is touched. default = NO.
@@ -132,6 +135,12 @@ enum _KLCPopupViewState {
 /// [controller] popup controller.
 ///
 /// [useRoute] if YES, then the popup will be shown as a route.
+///
+/// [didFinishShowingCompletion] called after show animation finishes
+///
+/// [willStartDismissingCompletion] called when dismiss animation starts
+///
+/// [didFinishDismissingCompletion] called after dismiss animation finishes
 Future<T?> showKLCPopup<T>(
   BuildContext context, {
   required Widget child,
@@ -143,7 +152,8 @@ Future<T?> showKLCPopup<T>(
   KLCPopupHorizontalLayout horizontalLayout = KLCPopupHorizontalLayout.center,
   KLCPopupVerticalLayout verticalLayout = KLCPopupVerticalLayout.center,
   KLCPopupMaskType maskType = KLCPopupMaskType.dimmed,
-  double dimmedMaskAlpha = 0.5,
+  @Deprecated('Use backgroundColor instead') double dimmedMaskAlpha = 0.5,
+  Color? backgroundColor,
   bool shouldDismissOnBackgroundTouch = true,
   bool shouldDismissOnContentTouch = false,
   Offset? offset,
@@ -151,6 +161,9 @@ Future<T?> showKLCPopup<T>(
   Curve? dismissCurve,
   KLCPopupController? controller,
   bool useRoute = false,
+  VoidCallback? didFinishShowingCompletion,
+  bool Function(T? result)? willStartDismissingCompletion,
+  void Function(T? result)? didFinishDismissingCompletion,
 }) {
   if (useRoute) {
     return Navigator.of(context).push<T>(
@@ -168,8 +181,12 @@ Future<T?> showKLCPopup<T>(
         dismissCurve: dismissCurve,
         animationBuilder: animationBuilder,
         dimmedMaskAlpha: dimmedMaskAlpha,
+        backgroundColor: backgroundColor,
         maskType: maskType,
         popupController: controller,
+        didFinishShowingCompletion: didFinishShowingCompletion,
+        willStartDismissingCompletion: willStartDismissingCompletion,
+        didFinishDismissingCompletion: didFinishDismissingCompletion,
         child: child,
       ),
     );
@@ -192,12 +209,16 @@ Future<T?> showKLCPopup<T>(
           dismissCurve: dismissCurve,
           animationBuilder: animationBuilder,
           dimmedMaskAlpha: dimmedMaskAlpha,
+          backgroundColor: backgroundColor,
           maskType: maskType,
           didFinishDismissingCompletion: (T? result) {
             weakOverlayEntry.target?.remove();
             completer.complete(result);
+            didFinishDismissingCompletion?.call(result);
           },
           controller: controller,
+          didFinishShowingCompletion: didFinishShowingCompletion,
+          willStartDismissingCompletion: willStartDismissingCompletion,
           child: child,
         );
       },
@@ -237,6 +258,7 @@ class KLCPopupRoute<T> extends PopupRoute<T> {
     this.dismissCurve,
     this.maskType = KLCPopupMaskType.dimmed,
     this.dimmedMaskAlpha = 0.5,
+    this.backgroundColor,
     this.shouldDismissOnBackgroundTouch = true,
     this.shouldDismissOnContentTouch = false,
     this.horizontalLayout = KLCPopupHorizontalLayout.center,
@@ -255,6 +277,7 @@ class KLCPopupRoute<T> extends PopupRoute<T> {
   final Curve? dismissCurve;
   final KLCPopupMaskType maskType;
   final double dimmedMaskAlpha;
+  final Color? backgroundColor;
   final bool shouldDismissOnBackgroundTouch;
   final bool shouldDismissOnContentTouch;
   final KLCPopupHorizontalLayout horizontalLayout;
@@ -347,6 +370,7 @@ class KLCPopup<T> extends StatefulWidget {
     this.dismissCurve,
     this.maskType = KLCPopupMaskType.dimmed,
     this.dimmedMaskAlpha = 0.5,
+    this.backgroundColor,
     this.shouldDismissOnBackgroundTouch = true,
     this.shouldDismissOnContentTouch = false,
     this.horizontalLayout = KLCPopupHorizontalLayout.center,
@@ -378,7 +402,11 @@ class KLCPopup<T> extends StatefulWidget {
   final KLCPopupMaskType maskType;
 
   /// Overrides alpha value for dimmed background mask. default = 0.5
+  @Deprecated('Use backgroundColor instead')
   final double dimmedMaskAlpha;
+
+  /// Background color of the popup. default = null.
+  final Color? backgroundColor;
 
   /// If YES, then popup will get dismissed when background is touched. default = YES.
   final bool shouldDismissOnBackgroundTouch;
@@ -418,7 +446,11 @@ class KLCPopup<T> extends StatefulWidget {
 
   /// Delay dismiss duration.
   final Duration? duration;
+
+  /// If YES, then the popup will be shown as a route.
   final bool useRoute;
+
+  /// If useRoute is true, this animation will be used to control the popup's visibility.
   final Animation<double>? routeAnimation;
   @override
   State<StatefulWidget> createState() => _KLCPopupState();
@@ -501,6 +533,7 @@ class _KLCPopupState extends State<KLCPopup> with SingleTickerProviderStateMixin
       verticalLayout: widget.verticalLayout,
       offset: widget.offset,
       dimmedMaskAlpha: widget.dimmedMaskAlpha,
+      backgroundColor: widget.backgroundColor,
       maskType: widget.maskType,
       child: child,
     );
@@ -612,6 +645,7 @@ class _KLCPopupRenderObjectWidget extends SingleChildRenderObjectWidget {
     this.verticalLayout = KLCPopupVerticalLayout.center,
     this.maskType = KLCPopupMaskType.dimmed,
     this.dimmedMaskAlpha = 0.5,
+    this.backgroundColor,
     this.offset,
   });
   final Animation<double>? animation;
@@ -622,6 +656,7 @@ class _KLCPopupRenderObjectWidget extends SingleChildRenderObjectWidget {
   final KLCPopupVerticalLayout verticalLayout;
   final KLCPopupMaskType maskType;
   final double dimmedMaskAlpha;
+  final Color? backgroundColor;
   final Offset? offset;
 
   @override
@@ -634,6 +669,7 @@ class _KLCPopupRenderObjectWidget extends SingleChildRenderObjectWidget {
       horizontalLayout: horizontalLayout,
       verticalLayout: verticalLayout,
       dimmedMaskAlpha: dimmedMaskAlpha,
+      backgroundColor: backgroundColor,
       maskType: maskType,
       offset: offset,
     );
@@ -651,6 +687,7 @@ class _KLCPopupRenderObjectWidget extends SingleChildRenderObjectWidget {
         ..verticalLayout = verticalLayout
         ..maskType = maskType
         ..dimmedMaskAlpha = dimmedMaskAlpha
+        ..backgroundColor = backgroundColor
         ..offset = offset;
     }
   }
@@ -667,6 +704,7 @@ class _KLCPopupRenderObject extends RenderShiftedBox {
     KLCPopupVerticalLayout verticalLayout = KLCPopupVerticalLayout.center,
     KLCPopupMaskType maskType = KLCPopupMaskType.dimmed,
     double dimmedMaskAlpha = 0.5,
+    Color? backgroundColor,
     Offset? offset,
   })  : _animation = animation,
         super(child) {
@@ -677,6 +715,7 @@ class _KLCPopupRenderObject extends RenderShiftedBox {
     _horizontalLayout = horizontalLayout;
     _verticalLayout = verticalLayout;
     _dimmedMaskAlpha = dimmedMaskAlpha;
+    _backgroundColor = backgroundColor;
     _maskType = maskType;
     _offset = offset;
   }
@@ -721,6 +760,16 @@ class _KLCPopupRenderObject extends RenderShiftedBox {
   set dimmedMaskAlpha(double value) {
     if (_dimmedMaskAlpha != value) {
       _dimmedMaskAlpha = value;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+    }
+  }
+
+  Color? _backgroundColor;
+  Color? get backgroundColor => _backgroundColor;
+  set backgroundColor(Color? value) {
+    if (_backgroundColor != value) {
+      _backgroundColor = value;
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     }
@@ -838,8 +887,9 @@ class _KLCPopupRenderObject extends RenderShiftedBox {
     }
     if (maskType == KLCPopupMaskType.dimmed) {
       Color bgColor = Colors.transparent;
+      Color endBgColor = backgroundColor ?? Colors.black.withValues(alpha: dimmedMaskAlpha);
       if (animation != null && (state == _KLCPopupViewState.showing || state == _KLCPopupViewState.dismissing || state == _KLCPopupViewState.show)) {
-        bgColor = ColorTween(begin: Colors.transparent, end: Colors.black.withOpacity(dimmedMaskAlpha)).evaluate(animation!)!;
+        bgColor = ColorTween(begin: endBgColor.withValues(alpha: 0), end: endBgColor).evaluate(animation!)!;
       }
       final paint = Paint()
         ..color = bgColor
